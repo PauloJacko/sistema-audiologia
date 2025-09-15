@@ -7,6 +7,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'dev-only-change-in-production'
 DEBUG = True
 
+# Autenticación
+LOGIN_URL = 'login'                # URL name de la vista de login
+LOGIN_REDIRECT_URL = 'home'        # A dónde ir después de loguearse
+LOGOUT_REDIRECT_URL = 'login'      # A dónde ir después de cerrar sesión
+
 ALLOWED_HOSTS = []  # en desarrollo
 
 INSTALLED_APPS = [
@@ -75,3 +80,18 @@ STATICFILES_DIRS = [BASE_DIR / 'static']  # <—— carpeta static (dev)
 STATIC_ROOT = BASE_DIR / 'staticfiles'    # <—— para collectstatic (prod)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'sistema_audiologia',
+        'USER': 'root',
+        'PASSWORD': '',        
+        'HOST': '127.0.0.1',   
+        'PORT': '3306',        
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
+    }
+}

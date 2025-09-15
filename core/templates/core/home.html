@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Home — Sistema Audiología</title>
+</head>
+<body>
+  <h1>Home</h1>
+  <p>Estás autenticado como: <strong>{{ request.user.username }}</strong></p>
+
+  <p><a href="{% url 'logout' %}">Cerrar sesión</a></p>
+</body>
+</html>
