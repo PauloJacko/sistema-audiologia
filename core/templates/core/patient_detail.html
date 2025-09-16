@@ -1,0 +1,127 @@
+{% extends "core/base.html" %}
+{% block title %}Ficha — {{ patient.last_name }}, {{ patient.first_name }}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-xl-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Paciente</h5>
+        <dl class="row mb-0">
+          <dt class="col-5 col-lg-4">RUT</dt><dd class="col-7 col-lg-8">{{ patient.rut }}</dd>
+          <dt class="col-5 col-lg-4">Nombre</dt><dd class="col-7 col-lg-8">{{ patient.last_name }}, {{ patient.first_name }}</dd>
+          <dt class="col-5 col-lg-4">Edad</dt><dd class="col-7 col-lg-8">{% if patient.birth_date %}{{ patient.age_on }}{% else %}-{% endif %}</dd>
+          <dt class="col-5 col-lg-4">Teléfono</dt><dd class="col-7 col-lg-8">{{ patient.phone|default:"—" }}</dd>
+          <dt class="col-5 col-lg-4">Email</dt><dd class="col-7 col-lg-8">{{ patient.email|default:"—" }}</dd>
+        </dl>
+
+        <div class="d-grid gap-2 mt-3">
+          <a class="btn btn-primary" href="{% url 'anamnesis_create' patient.pk %}"><i class="bi bi-clipboard2-pulse"></i> Nueva Anamnesis</a>
+          <a class="btn btn-outline-primary" href="{% url 'audiogram_create' patient.pk %}"><i class="bi bi-activity"></i> Nueva Audiometría</a>
+          <a class="btn btn-outline-secondary" href="{% url 'speech_create' patient.pk %}"><i class="bi bi-chat-dots"></i> Vocal</a>
+          <a class="btn btn-outline-secondary" href="{% url 'ldl_create' patient.pk %}"><i class="bi bi-soundwave"></i> LDL</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-8">
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-anam" type="button" role="tab">Anamnesis</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-audio" type="button" role="tab">Audiometrías</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-speech" type="button" role="tab">Vocal / LDL</button>
+      </li>
+    </ul>
+
+    <div class="tab-content border-start border-end border-bottom p-3">
+      <div id="tab-anam" class="tab-pane fade show active" role="tabpanel">
+        {% if anamneses %}
+          <div class="list-group list-group-flush">
+            {% for a in anamneses %}
+              <div class="list-group-item">
+                <div class="d-flex justify-content-between">
+                  <strong>{{ a.date }}</strong>
+                  <span class="text-secondary small">ruido: {{ a.noise_exposure|yesno:"sí,no" }}, vértigo: {{ a.vertigo|yesno:"sí,no" }}</span>
+                </div>
+                <div class="text-secondary small mt-2">{{ a.main_complaint|default:"(sin descripción)" }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-secondary m-0">Sin registros.</p>
+        {% endif %}
+      </div>
+
+      <div id="tab-audio" class="tab-pane fade" role="tabpanel">
+        {% if audiograms %}
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Fecha</th>
+                  <th>Tipo</th>
+                  <th>PTA OD</th>
+                  <th>PTA OI</th>
+                  <th>Comentarios</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for ag in audiograms %}
+                <tr>
+                  <td>{{ ag.date }}</td>
+                  <td>{{ ag.get_exam_type_display }}</td>
+                  <td>{{ ag.pta_right|default:"—" }}</td>
+                  <td>{{ ag.pta_left|default:"—" }}</td>
+                  <td class="text-truncate" style="max-width: 240px;">{{ ag.comments|default:"" }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-secondary m-0">Sin registros.</p>
+        {% endif %}
+      </div>
+
+      <div id="tab-speech" class="tab-pane fade" role="tabpanel">
+        <div class="row g-3">
+          <div class="col-12">
+            <h6 class="text-secondary">Audiometría vocal reciente</h6>
+            {% if speech %}
+              <ul class="list-group list-group-flush">
+              {% for s in speech %}
+                <li class="list-group-item">
+                  <strong>{{ s.date }}</strong> — {{ s.get_ear_display }} | SRT: {{ s.srt|default:"—" }} dB HL | WRS: {{ s.wrs_percent|default:"—" }}% @ {{ s.wrs_level_db|default:"—" }} dB HL
+                </li>
+              {% endfor %}
+              </ul>
+            {% else %}
+              <p class="text-secondary m-0">Sin registros.</p>
+            {% endif %}
+          </div>
+          <div class="col-12">
+            <h6 class="text-secondary">LDL reciente</h6>
+            {% if ldl %}
+              <ul class="list-group list-group-flush">
+              {% for l in ldl %}
+                <li class="list-group-item">
+                  <strong>{{ l.date }}</strong> — {{ l.get_ear_display }} | 500: {{ l.ldl_500|default:"—" }}, 1k: {{ l.ldl_1k|default:"—" }}, 2k: {{ l.ldl_2k|default:"—" }}, 4k: {{ l.ldl_4k|default:"—" }} (dB HL)
+                </li>
+              {% endfor %}
+              </ul>
+            {% else %}
+              <p class="text-secondary m-0">Sin registros.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

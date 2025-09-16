@@ -1,0 +1,26 @@
+{% extends "core/base.html" %}
+{% block title %}Audiometría Vocal — {{ patient.last_name }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Audiometría Vocal — {{ patient.last_name }}, {{ patient.first_name }}</h5>
+        <form method="post" class="row g-3">
+          {% csrf_token %}
+          <div class="col-sm-3"><label class="form-label">Fecha</label>{{ form.date }}</div>
+          <div class="col-sm-3"><label class="form-label">Oído</label>{{ form.ear|add_class:"form-select" }}</div>
+          <div class="col-sm-3"><label class="form-label">SRT/SDT (dB)</label>{{ form.srt|add_class:"form-control" }}</div>
+          <div class="col-sm-3"><label class="form-label">Nivel (dB)</label>{{ form.wrs_level_db|add_class:"form-control" }}</div>
+          <div class="col-sm-3"><label class="form-label">WRS (%)</label>{{ form.wrs_percent|add_class:"form-control" }}</div>
+          <div class="col-12"><label class="form-label">Notas</label>{{ form.notes|add_class:"form-control" }}</div>
+          <div class="col-12 d-flex gap-2">
+            <a href="{% url 'patient_detail' patient.pk %}" class="btn btn-outline-secondary">Cancelar</a>
+            <button class="btn btn-primary" type="submit">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

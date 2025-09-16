@@ -1,13 +1,65 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Home — Sistema Audiología</title>
-</head>
-<body>
-  <h1>Home</h1>
-  <p>Estás autenticado como: <strong>{{ request.user.username }}</strong></p>
+{% extends "core/base.html" %}
+{% block title %}Inicio — Sistema Audiología{% endblock %}
 
-  <p><a href="{% url 'logout' %}">Cerrar sesión</a></p>
-</body>
-</html>
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-lg-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Acciones rápidas</h5>
+        <div class="d-grid gap-2">
+          <a href="{% url 'patient_create' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus"></i> Nuevo Paciente
+          </a>
+          <a href="{% url 'patient_list' %}" class="btn btn-outline-primary">
+            <i class="bi bi-people"></i> Buscar/Listar Pacientes
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-8">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title mb-0">Pacientes recientes</h5>
+          <a class="small" href="{% url 'patient_list' %}">Ver todos</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>RUT</th>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in patients %}
+              <tr>
+                <td>{{ p.rut }}</td>
+                <td>{{ p.last_name }}, {{ p.first_name }}</td>
+                <td>
+                  {% if p.birth_date %}
+                    {% with age=p.age_on|default_if_none:"" %}{{ age }}{% endwith %}
+                  {% else %}-{% endif %}
+                </td>
+                <td class="text-end">
+                  <a class="btn btn-sm btn-outline-primary" href="{% url 'patient_detail' p.pk %}">
+                    Abrir
+                  </a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center text-secondary">Sin pacientes aún.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

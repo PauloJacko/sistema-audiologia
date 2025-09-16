@@ -1,0 +1,59 @@
+{% extends "core/base.html" %}
+{% load form_extras %}
+{% block title %}{{ title }} — Sistema Audiología{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">{{ title }}</h5>
+        <form method="post" class="row g-3">
+          {% csrf_token %}
+          <div class="col-sm-6">
+            <label class="form-label">RUT</label>
+            {{ form.rut|add_class:"form-control" }}
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label">Fecha de nacimiento</label>
+            {{ form.birth_date }}
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label">Nombres</label>
+            {{ form.first_name|add_class:"form-control" }}
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label">Apellidos</label>
+            {{ form.last_name|add_class:"form-control" }}
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label">Sexo</label>
+            {{ form.sex|add_class:"form-select" }}
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label">Teléfono</label>
+            {{ form.phone|add_class:"form-control" }}
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label">Email</label>
+            {{ form.email|add_class:"form-control" }}
+          </div>
+          <div class="col-12 d-flex gap-2">
+            <a href="{% url 'patient_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+            <button class="btn btn-primary" type="submit">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+{% comment %}
+Pequeño filtro para agregar clases a widgets en el template
+{% endcomment %}
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}

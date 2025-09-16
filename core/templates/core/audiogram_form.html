@@ -1,0 +1,151 @@
+{% extends "core/base.html" %}
+{% block title %}Nueva Audiometría — {{ patient.last_name }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-xxl-10">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Audiometría — {{ patient.last_name }}, {{ patient.first_name }}</h5>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-sm-3">
+            <label class="form-label">Fecha</label>
+            {{ a_form.date }}
+            </div>
+            <div class="col-sm-3">
+            <label class="form-label">Tipo</label>
+            {{ a_form.exam_type }}
+            </div>
+            <div class="col-sm-3">
+            <label class="form-label">Transductor</label>
+            {{ a_form.transducer }}
+            </div>
+            <div class="col-sm-3 form-check mt-4">
+            <label class="form-check-label">
+                {{ a_form.masking_used }} Enmascaramiento
+            </label>
+            </div>
+            <div class="col-12">
+            <label class="form-label">Comentarios</label>
+            {{ a_form.comments }}
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Oído</th>
+                  <th>Vía</th>
+                  <th>Símbolo</th>
+                  <th>250</th><th>500</th><th>1000</th><th>2000</th><th>3000</th><th>4000</th><th>6000</th><th>8000</th>
+                </tr>
+              </thead>
+                <tbody>
+                {{ t_formset.management_form }}
+                {% for form in t_formset %}
+                <tr>
+                    <td>{{ form.ear }}</td>
+                    <td>{{ form.pathway }}</td>
+                    <td>{{ form.symbol }}</td>
+                    <td>{{ form.f_250 }}</td>
+                    <td>{{ form.f_500 }}</td>
+                    <td>{{ form.f_1000 }}</td>
+                    <td>{{ form.f_2000 }}</td>
+                    <td>{{ form.f_3000 }}</td>
+                    <td>{{ form.f_4000 }}</td>
+                    <td>{{ form.f_6000 }}</td>
+                    <td>{{ form.f_8000 }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="p-3 border rounded-3 bg-light">
+                <strong>PTA Automático (regla: Adulto 500-1k-2k | Pediátrico 1k-2k-4k)</strong>
+                <div class="mt-2 small text-secondary">Se calcula con Aérea OD/OI; se mostrará tras guardar, pero aquí tienes un estimado en vivo.</div>
+                <div class="d-flex gap-4 mt-2">
+                  <div>PTA OD: <span id="ptaR">—</span> dB HL</div>
+                  <div>PTA OI: <span id="ptaL">—</span> dB HL</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 d-flex gap-2">
+            <a href="{% url 'patient_detail' patient.pk %}" class="btn btn-outline-secondary">Cancelar</a>
+            <button class="btn btn-primary" type="submit">Guardar</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  function val(id){ const el=document.getElementById(id); return el? Number(el.value) : NaN; }
+
+  // Busca inputs por name (Django genera ids "id_form-0-f_500", etc.)
+  function findValByName(name){
+    const el = document.querySelector(`[name="${name}"]`);
+    return el && el.value !== "" ? Number(el.value) : NaN;
+  }
+
+  function avg3(a,b,c){ const xs=[a,b,c].filter(n=>!isNaN(n)); return xs.length===3 ? Math.round((xs[0]+xs[1]+xs[2])/3) : NaN; }
+
+  function calcPTA(formsetCount){
+    // intentamos hallar la fila OD Aérea (ear=R, pathway=AC) y OI Aérea (ear=L, pathway=AC)
+    // Recorremos los formularios y chequeamos selects por nombre "form-*-ear" y "form-*-pathway"
+    let idxR = null, idxL = null;
+    for (let i=0; i<formsetCount; i++){
+      const ear = document.querySelector(`[name="form-${i}-ear"]`)?.value;
+      const path = document.querySelector(`[name="form-${i}-pathway"]`)?.value;
+      if (ear==="R" && path==="AC") idxR = i;
+      if (ear==="L" && path==="AC") idxL = i;
+    }
+
+    function ptaForIndex(i){
+      if (i===null) return NaN;
+      // estimamos regla adulto (500,1000,2000) y pediátrica (1000,2000,4000)
+      const f500 = findValByName(`form-${i}-f_500`);
+      const f1k  = findValByName(`form-${i}-f_1000`);
+      const f2k  = findValByName(`form-${i}-f_2000`);
+      const f4k  = findValByName(`form-${i}-f_4000`);
+      const adult = avg3(f500, f1k, f2k);
+      const ped   = avg3(f1k, f2k, f4k);
+      // mostramos el que esté más completo
+      if (!isNaN(adult) && !isNaN(ped)) return `${adult} (adulto) / ${ped} (pediátrico)`;
+      if (!isNaN(adult)) return `${adult} (adulto)`;
+      if (!isNaN(ped)) return `${ped} (pediátrico)`;
+      return "—";
+    }
+
+    document.getElementById("ptaR").textContent = ptaForIndex(idxR);
+    document.getElementById("ptaL").textContent = ptaForIndex(idxL);
+  }
+
+  // Detectar cuántos forms hay
+  const totalFormsEl = document.querySelector('[name="form-TOTAL_FORMS"]');
+  const total = totalFormsEl ? Number(totalFormsEl.value) : 0;
+
+  // Eventos
+  document.addEventListener("input", function(e){
+    if (e.target && e.target.name && e.target.name.includes("f_")) {
+      calcPTA(total);
+    }
+  });
+  calcPTA(total);
+})();
+</script>
+{% endblock %}
