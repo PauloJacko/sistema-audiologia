@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
 {% block title %}Nueva Audiometría — {{ patient.last_name }}{% endblock %}
+
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-12 col-xxl-10">
@@ -11,31 +12,85 @@
           {% csrf_token %}
           <div class="row g-3">
             <div class="col-sm-3">
-            <label class="form-label">Fecha</label>
-            {{ a_form.date }}
+              <label class="form-label" for="{{ a_form.date.id_for_label }}">Fecha</label>
+              {{ a_form.date }}
             </div>
             <div class="col-sm-3">
-            <label class="form-label">Tipo</label>
-            {{ a_form.exam_type }}
+              <label class="form-label" for="{{ a_form.exam_type.id_for_label }}">Tipo</label>
+              {{ a_form.exam_type }}
             </div>
             <div class="col-sm-3">
-            <label class="form-label">Transductor</label>
-            {{ a_form.transducer }}
+              <label class="form-label" for="{{ a_form.transducer.id_for_label }}">Transductor</label>
+              {{ a_form.transducer }}
             </div>
-            <div class="col-sm-3 form-check mt-4">
-            <label class="form-check-label">
-                {{ a_form.masking_used }} Enmascaramiento
-            </label>
+            <div class="col-sm-3 d-flex align-items-end">
+              <div class="form-check">
+                {{ a_form.masking_used }}
+                <label class="form-check-label" for="{{ a_form.masking_used.id_for_label }}">Enmascaramiento</label>
+              </div>
             </div>
             <div class="col-12">
-            <label class="form-label">Comentarios</label>
-            {{ a_form.comments }}
+              <label class="form-label" for="{{ a_form.comments.id_for_label }}">Comentarios</label>
+              {{ a_form.comments }}
             </div>
           </div>
 
           <hr class="my-4">
 
-          <div class="table-responsive">
+          <!-- ======= Audiograma Interactivo ======= -->
+          <div class="row g-3">
+            <div class="col-12 col-lg-7">
+              <div class="border rounded-3 p-2">
+                <div class="d-flex justify-content-between align-items-center px-2">
+                  <div class="fw-semibold">Audiograma</div>
+                  <div class="small text-secondary">Click para fijar umbral (dB HL)</div>
+                </div>
+                <div class="ratio ratio-4x3 bg-white rounded-3 mt-2" id="audiogramCanvasWrap">
+                  <!-- SVG se inyecta por JS -->
+                  <svg id="audiogramSVG" role="img" aria-label="Audiograma" class="w-100 h-100"></svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-5">
+              <div class="border rounded-3 p-3 h-100">
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Trazo activo</label>
+                  <select id="tracePicker" class="form-select">
+                    <!-- Opciones se llenan automáticamente leyendo el formset -->
+                  </select>
+                  <div class="small text-secondary mt-1">
+                    Selecciona qué trazo (OD/OI · Aérea/Ósea) editar; los clicks en la grilla asignan el valor para esa curva.
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Símbolo del trazo</label>
+                  <div class="d-flex flex-wrap gap-2" id="symbolPalette">
+                    <!-- Botones de símbolo se pintan según el trazo (rojo/azul). -->
+                    <!-- Generamos por JS desde opciones estándar -->
+                  </div>
+                  <div class="small text-secondary mt-1">
+                    Puedes cambiar el símbolo del trazo activo (O, X, &lt;, &gt;, [ , ], Δ, ◇).
+                  </div>
+                </div>
+
+                <div class="p-3 border rounded-3 bg-light">
+                  <strong>PTA Automático</strong>
+                  <div class="mt-2 small text-secondary">
+                    Regla Adulto: 500–1k–2k &nbsp;|&nbsp; Pediátrico: 1k–2k–4k
+                  </div>
+                  <div class="d-flex gap-4 mt-2 flex-wrap">
+                    <div>PTA OD: <span id="ptaR">—</span> dB HL</div>
+                    <div>PTA OI: <span id="ptaL">—</span> dB HL</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ======= Tabla (tus formularios) ======= -->
+          <div class="table-responsive mt-4">
             <table class="table align-middle">
               <thead class="table-light">
                 <tr>
@@ -45,38 +100,25 @@
                   <th>250</th><th>500</th><th>1000</th><th>2000</th><th>3000</th><th>4000</th><th>6000</th><th>8000</th>
                 </tr>
               </thead>
-                <tbody>
+              <tbody>
                 {{ t_formset.management_form }}
                 {% for form in t_formset %}
                 <tr>
-                    <td>{{ form.ear }}</td>
-                    <td>{{ form.pathway }}</td>
-                    <td>{{ form.symbol }}</td>
-                    <td>{{ form.f_250 }}</td>
-                    <td>{{ form.f_500 }}</td>
-                    <td>{{ form.f_1000 }}</td>
-                    <td>{{ form.f_2000 }}</td>
-                    <td>{{ form.f_3000 }}</td>
-                    <td>{{ form.f_4000 }}</td>
-                    <td>{{ form.f_6000 }}</td>
-                    <td>{{ form.f_8000 }}</td>
+                  <td>{{ form.ear }}</td>
+                  <td>{{ form.pathway }}</td>
+                  <td>{{ form.symbol }}</td>
+                  <td>{{ form.f_250 }}</td>
+                  <td>{{ form.f_500 }}</td>
+                  <td>{{ form.f_1000 }}</td>
+                  <td>{{ form.f_2000 }}</td>
+                  <td>{{ form.f_3000 }}</td>
+                  <td>{{ form.f_4000 }}</td>
+                  <td>{{ form.f_6000 }}</td>
+                  <td>{{ form.f_8000 }}</td>
                 </tr>
                 {% endfor %}
-                </tbody>
+              </tbody>
             </table>
-          </div>
-
-          <div class="row g-3">
-            <div class="col-md-6">
-              <div class="p-3 border rounded-3 bg-light">
-                <strong>PTA Automático (regla: Adulto 500-1k-2k | Pediátrico 1k-2k-4k)</strong>
-                <div class="mt-2 small text-secondary">Se calcula con Aérea OD/OI; se mostrará tras guardar, pero aquí tienes un estimado en vivo.</div>
-                <div class="d-flex gap-4 mt-2">
-                  <div>PTA OD: <span id="ptaR">—</span> dB HL</div>
-                  <div>PTA OI: <span id="ptaL">—</span> dB HL</div>
-                </div>
-              </div>
-            </div>
           </div>
 
           <div class="mt-4 d-flex gap-2">
@@ -94,58 +136,257 @@
 {% block extra_js %}
 <script>
 (function(){
-  function val(id){ const el=document.getElementById(id); return el? Number(el.value) : NaN; }
+  // ======== Config básica del audiograma ========
+  const freqs = [250, 500, 1000, 2000, 3000, 4000, 6000, 8000];
+  const minDb = -10, maxDb = 120, stepDb = 10; // ejes Y
+  const COLORS = { R: "#dc3545", L: "#0d6efd", B: "#14b8a6" }; // OD rojo, OI azul, ambos teal
+  const SYMBOL_CHOICES = ["O", "X", "<", ">", "[", "]", "Δ", "◇"];
 
-  // Busca inputs por name (Django genera ids "id_form-0-f_500", etc.)
+  const svg = document.getElementById("audiogramSVG");
+  const picker = document.getElementById("tracePicker");
+  const symbolPalette = document.getElementById("symbolPalette");
+
+  // Tamaño/box del SVG
+  const P = { l: 48, r: 24, t: 24, b: 32 };
+  const W = 720, H = 520; // responsive por viewBox
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.style.width = "100%"; svg.style.height = "100%";
+
+  // Helpers de grilla
+  const plotW = W - P.l - P.r;
+  const plotH = H - P.t - P.b;
+  const xForFreq = (f) => {
+    // escala log2 para sensación auditiva (250–8k)
+    const log = (x) => Math.log2(x);
+    const t = (log(f) - log(freqs[0])) / (log(freqs[freqs.length-1]) - log(freqs[0]));
+    return P.l + t * plotW;
+  };
+  const yForDb = (db) => {
+    const clamped = Math.max(minDb, Math.min(maxDb, db));
+    const t = (clamped - minDb) / (maxDb - minDb); // 0..1
+    return P.t + t * plotH; // hacia abajo
+  };
+  const nearestFreq = (x) => {
+    // devuelve frecuencia más cercana y su índice
+    let best = 0, bestDx = Infinity;
+    for (let i=0;i<freqs.length;i++){
+      const dx = Math.abs(x - xForFreq(freqs[i]));
+      if (dx < bestDx){ bestDx = dx; best = i; }
+    }
+    return {idx: best, freq: freqs[best]};
+  };
+  const nearestDb = (y) => {
+    // a pasos de 5 dB (más fino que 10 para clínica)
+    const t = (y - P.t) / plotH;
+    const db = minDb + t * (maxDb - minDb);
+    return Math.round(db/5)*5;
+  };
+
+  // ======== Leer formset y construir "trazos" ========
+  const totalFormsEl = document.querySelector('[name="form-TOTAL_FORMS"]');
+  const total = totalFormsEl ? Number(totalFormsEl.value) : 0;
+
+  function getField(i, name){ return document.querySelector(`[name="form-${i}-${name}"]`); }
+  function readTrace(i){
+    const ear = getField(i,"ear")?.value || "R";   // R,L,B
+    const path = getField(i,"pathway")?.value || "AC"; // AC,BC
+    const symbol = getField(i,"symbol")?.value || (ear==="R"?"O": ear==="L"?"X":"◇");
+    const points = {};
+    for(const f of freqs){
+      const el = getField(i, `f_${f}`);
+      const v = el && el.value !== "" ? Number(el.value) : null;
+      points[f] = (v===null || Number.isNaN(v)) ? null : v;
+    }
+    return { i, ear, path, symbol, points };
+  }
+  function writeTracePoint(i, freq, db){
+    const el = getField(i, `f_${freq}`);
+    if (el){ el.value = db; el.dispatchEvent(new Event("input", {bubbles:true})); }
+  }
+  function writeTraceSymbol(i, sym){
+    const el = getField(i, "symbol");
+    if (el){ el.value = sym; el.dispatchEvent(new Event("change", {bubbles:true})); }
+  }
+
+  let traces = [];
+  function refreshTraces(){
+    traces = [];
+    for(let i=0;i<total;i++){ traces.push(readTrace(i)); }
+  }
+
+  // ======== Dibujar grilla y ejes ========
+  function drawGrid(){
+    svg.innerHTML = ""; // limpiar
+    const g = (cls) => { const n=document.createElementNS("http://www.w3.org/2000/svg","g"); if(cls) n.setAttribute("class",cls); svg.appendChild(n); return n; };
+    const add = (tag, attrs, parent=svg) => {
+      const n=document.createElementNS("http://www.w3.org/2000/svg",tag);
+      for (const k in attrs){ n.setAttribute(k, attrs[k]); }
+      parent.appendChild(n); return n;
+    };
+
+    // Fondo
+    add("rect",{x:0,y:0,width:W,height:H,fill:"#fff",rx:12,ry:12});
+
+    // Líneas verticales por frecuencia
+    const gGrid = g("grid");
+    for(const f of freqs){
+      const x = xForFreq(f);
+      add("line",{x1:x,y1:P.t,x2:x,y2:H-P.b,stroke:"#e5e7eb"});
+      add("text",{x:x,y:H-8,"text-anchor":"middle","font-size":"12",fill:"#334155"},).textContent = (f>=1000? (f/1000+"k"):f);
+    }
+    // Líneas horizontales cada 10 dB
+    for(let db=minDb; db<=maxDb; db+=stepDb){
+      const y = yForDb(db);
+      add("line",{x1:P.l,y1:y,x2:W-P.r,y2:y,stroke: db===0 ? "#94a3b8":"#e5e7eb","stroke-width": db===0?1.5:1});
+      add("text",{x:8,y:y+4,"font-size":"11",fill:"#64748b"},).textContent = db;
+    }
+
+    // Marco
+    add("rect",{x:P.l,y:P.t,width:plotW,height:plotH,fill:"none",stroke:"#cbd5e1","rx":8,"ry":8});
+  }
+
+  // ======== Dibujar puntos/símbolos ========
+  function drawTraces(){
+    const add = (tag, attrs, parent=svg) => { const n=document.createElementNS("http://www.w3.org/2000/svg",tag); for(const k in attrs){ n.setAttribute(k, attrs[k]); } parent.appendChild(n); return n; };
+    // Grupo para símbolos (sobre la grilla)
+    const layer = document.createElementNS("http://www.w3.org/2000/svg","g");
+    svg.appendChild(layer);
+
+    traces.forEach(t=>{
+      const color = COLORS[t.ear] || "#0f172a";
+      for(const f of freqs){
+        const v = t.points[f];
+        if(v===null || Number.isNaN(v)) continue;
+        const x = xForFreq(f);
+        const y = yForDb(v);
+        // Para diferenciar AC/BC: AC usamos texto; BC dibujamos símbolo con subrayado punteado
+        const txt = add("text",{
+          x, y, "text-anchor":"middle","dominant-baseline":"central",
+          "font-size": (t.symbol==="Δ"||t.symbol==="◇")? 18 : 20,
+          fill: color, "font-family":"ui-sans-serif, system-ui"
+        }, layer);
+        txt.textContent = t.symbol || (t.ear==="R"?"O": t.ear==="L"?"X":"◇");
+
+        if (t.path==="BC"){
+          // línea horizontal corta (como marca ósea)
+          add("line", {x1:x-10, y1:y, x2:x+10, y2:y, stroke: color, "stroke-dasharray":"3,2"}, layer);
+        }
+      }
+    });
+  }
+
+  // ======== Interacción: click para fijar valor ========
+  function pickActiveIndex(){
+    const val = picker.value;
+    return val? Number(val) : 0;
+  }
+
+  function handleClick(evt){
+    const pt = svg.createSVGPoint();
+    pt.x = evt.clientX; pt.y = evt.clientY;
+    const ctm = svg.getScreenCTM().inverse();
+    const p = pt.matrixTransform(ctm);
+
+    // dentro del rectángulo del plot:
+    if (p.x < P.l || p.x > W-P.r || p.y < P.t || p.y > H-P.b) return;
+
+    const {idx,freq} = nearestFreq(p.x);
+    const db = nearestDb(p.y);
+
+    const i = pickActiveIndex();
+    writeTracePoint(i, freq, db);
+    refreshTraces();
+    drawGrid(); drawTraces();
+    calcPTA(total);
+  }
+
+  svg.addEventListener("click", handleClick);
+
+  // ======== Trace picker & palette ========
+  function labelFor(t){
+    const ear = t.ear==="R"?"OD": t.ear==="L"?"OI":"Ambos";
+    const path = t.path==="AC"?"Aérea":"Ósea";
+    return `${ear} · ${path}`;
+  }
+  function paintPicker(){
+    picker.innerHTML = "";
+    traces.forEach(t=>{
+      const opt = document.createElement("option");
+      opt.value = t.i;
+      opt.textContent = labelFor(t);
+      picker.appendChild(opt);
+    });
+  }
+  function paintPalette(){
+    symbolPalette.innerHTML="";
+    const i = pickActiveIndex();
+    const t = traces.find(x=>x.i===i) || traces[0];
+    const color = COLORS[t.ear] || "#0f172a";
+    SYMBOL_CHOICES.forEach(sym=>{
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "btn btn-outline-secondary btn-sm";
+      b.style.borderColor = "#e2e8f0";
+      b.style.color = color;
+      b.textContent = sym;
+      b.onclick = ()=>{
+        writeTraceSymbol(i, sym);
+        refreshTraces(); drawGrid(); drawTraces();
+      };
+      symbolPalette.appendChild(b);
+    });
+  }
+  picker.addEventListener("change", paintPalette);
+
+  // ======== Redibujar al cambiar inputs ========
+  document.addEventListener("input", (e)=>{
+    if (!e.target.name) return;
+    if (e.target.name.startsWith("form-") && (e.target.name.includes("f_") || e.target.name.endsWith("-symbol") || e.target.name.endsWith("-ear") || e.target.name.endsWith("-pathway"))) {
+      refreshTraces(); drawGrid(); drawTraces(); paintPicker(); paintPalette(); calcPTA(total);
+    }
+  });
+  document.addEventListener("change", (e)=>{
+    if (!e.target.name) return;
+    if (e.target.name.startsWith("form-") && (e.target.name.endsWith("-symbol") || e.target.name.endsWith("-ear") || e.target.name.endsWith("-pathway"))) {
+      refreshTraces(); drawGrid(); drawTraces(); paintPicker(); paintPalette(); calcPTA(total);
+    }
+  });
+
+  // ======== PTA en vivo (tu misma lógica, integrada) ========
+  function findIdx(ear, path){
+    for(let i=0;i<total;i++){
+      const e = getField(i,"ear")?.value, p = getField(i,"pathway")?.value;
+      if (e===ear && p===path) return i;
+    }
+    return null;
+  }
   function findValByName(name){
     const el = document.querySelector(`[name="${name}"]`);
     return el && el.value !== "" ? Number(el.value) : NaN;
   }
-
   function avg3(a,b,c){ const xs=[a,b,c].filter(n=>!isNaN(n)); return xs.length===3 ? Math.round((xs[0]+xs[1]+xs[2])/3) : NaN; }
-
-  function calcPTA(formsetCount){
-    // intentamos hallar la fila OD Aérea (ear=R, pathway=AC) y OI Aérea (ear=L, pathway=AC)
-    // Recorremos los formularios y chequeamos selects por nombre "form-*-ear" y "form-*-pathway"
-    let idxR = null, idxL = null;
-    for (let i=0; i<formsetCount; i++){
-      const ear = document.querySelector(`[name="form-${i}-ear"]`)?.value;
-      const path = document.querySelector(`[name="form-${i}-pathway"]`)?.value;
-      if (ear==="R" && path==="AC") idxR = i;
-      if (ear==="L" && path==="AC") idxL = i;
-    }
-
-    function ptaForIndex(i){
-      if (i===null) return NaN;
-      // estimamos regla adulto (500,1000,2000) y pediátrica (1000,2000,4000)
-      const f500 = findValByName(`form-${i}-f_500`);
-      const f1k  = findValByName(`form-${i}-f_1000`);
-      const f2k  = findValByName(`form-${i}-f_2000`);
-      const f4k  = findValByName(`form-${i}-f_4000`);
-      const adult = avg3(f500, f1k, f2k);
-      const ped   = avg3(f1k, f2k, f4k);
-      // mostramos el que esté más completo
-      if (!isNaN(adult) && !isNaN(ped)) return `${adult} (adulto) / ${ped} (pediátrico)`;
-      if (!isNaN(adult)) return `${adult} (adulto)`;
-      if (!isNaN(ped)) return `${ped} (pediátrico)`;
-      return "—";
-    }
-
+  function ptaForIndex(i){
+    if (i===null) return "—";
+    const f500 = findValByName(`form-${i}-f_500`);
+    const f1k  = findValByName(`form-${i}-f_1000`);
+    const f2k  = findValByName(`form-${i}-f_2000`);
+    const f4k  = findValByName(`form-${i}-f_4000`);
+    const adult = avg3(f500, f1k, f2k);
+    const ped   = avg3(f1k, f2k, f4k);
+    if (!isNaN(adult) && !isNaN(ped)) return `${adult} (adulto) / ${ped} (pediátrico)`;
+    if (!isNaN(adult)) return `${adult} (adulto)`;
+    if (!isNaN(ped)) return `${ped} (pediátrico)`;
+    return "—";
+  }
+  function calcPTA(){
+    const idxR = findIdx("R","AC");
+    const idxL = findIdx("L","AC");
     document.getElementById("ptaR").textContent = ptaForIndex(idxR);
     document.getElementById("ptaL").textContent = ptaForIndex(idxL);
   }
 
-  // Detectar cuántos forms hay
-  const totalFormsEl = document.querySelector('[name="form-TOTAL_FORMS"]');
-  const total = totalFormsEl ? Number(totalFormsEl.value) : 0;
-
-  // Eventos
-  document.addEventListener("input", function(e){
-    if (e.target && e.target.name && e.target.name.includes("f_")) {
-      calcPTA(total);
-    }
-  });
-  calcPTA(total);
+  // ======== Boot ========
+  refreshTraces(); drawGrid(); drawTraces(); paintPicker(); paintPalette(); calcPTA(total);
 })();
 </script>
 {% endblock %}

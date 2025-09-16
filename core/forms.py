@@ -18,25 +18,34 @@ class PatientForm(forms.ModelForm):
 class AnamnesisForm(forms.ModelForm):
     class Meta:
         model = Anamnesis
-        exclude = ["patient", "created_at"]
+        fields = [
+            "date", "main_complaint",
+            "hearing_loss", "tinnitus", "otalgia", "otorrhea",
+            "vertigo", "noise_exposure", "hearing_aids",
+            "medication", "vertigo_type", "vertigo_duration", "vertigo_triggers",
+            "notes",
+        ]
         widgets = {
-            "date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
-            "main_complaint": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
-            "medication": forms.Textarea(attrs={"rows": 2, "class": "form-control"}),
-            "notes": forms.Textarea(attrs={"rows": 2, "class": "form-control"}),
-            # Campos de texto simples
+            "date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "main_complaint": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
+            "medication": forms.TextInput(attrs={"class": "form-control"}),
             "vertigo_type": forms.TextInput(attrs={"class": "form-control"}),
             "vertigo_duration": forms.TextInput(attrs={"class": "form-control"}),
             "vertigo_triggers": forms.TextInput(attrs={"class": "form-control"}),
-            # Checkboxes
-            "hearing_loss": forms.CheckboxInput(attrs={"class": "form-check-input"}),
-            "tinnitus": forms.CheckboxInput(attrs={"class": "form-check-input"}),
-            "otalgia": forms.CheckboxInput(attrs={"class": "form-check-input"}),
-            "otorrhea": forms.CheckboxInput(attrs={"class": "form-check-input"}),
-            "vertigo": forms.CheckboxInput(attrs={"class": "form-check-input"}),
-            "noise_exposure": forms.CheckboxInput(attrs={"class": "form-check-input"}),
-            "hearing_aids": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "notes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Aplica clase Bootstrap a todos los checkboxes
+        for name in [
+            "hearing_loss", "tinnitus", "otalgia", "otorrhea",
+            "vertigo", "noise_exposure", "hearing_aids",
+        ]:
+            if name in self.fields:
+                self.fields[name].widget = forms.CheckboxInput(
+                    attrs={"class": "form-check-input"}
+                )
 
 class AudiogramForm(forms.ModelForm):
     class Meta:

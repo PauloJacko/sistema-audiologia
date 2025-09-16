@@ -6,97 +6,112 @@
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">Anamnesis — {{ patient.last_name }}, {{ patient.first_name }}</h5>
+
         <form method="post" class="row g-3">
           {% csrf_token %}
 
           <div class="col-sm-4">
-            <label class="form-label">Fecha</label>
+            <label class="form-label" for="{{ form.date.id_for_label }}">Fecha</label>
             {{ form.date }}
           </div>
 
           <div class="col-12">
-            <label class="form-label">Motivo de consulta</label>
+            <label class="form-label" for="{{ form.main_complaint.id_for_label }}">Motivo de consulta</label>
             {{ form.main_complaint }}
           </div>
 
-          <!-- Checkboxes explícitos (sin .split) -->
+          <!-- Checkboxes -->
           <div class="col-12">
             <div class="row g-3">
               <div class="col-6 col-md-3">
                 <div class="form-check">
-                  {{ form.hearing_loss.as_widget(attrs={'class':'form-check-input','id':'id_hearing_loss'}) }}
-                  <label class="form-check-label" for="id_hearing_loss">{{ form.hearing_loss.label }}</label>
+                  {{ form.hearing_loss }}
+                  <label class="form-check-label" for="{{ form.hearing_loss.id_for_label }}">
+                    {{ form.hearing_loss.label }}
+                  </label>
                 </div>
               </div>
 
               <div class="col-6 col-md-3">
                 <div class="form-check">
-                  {{ form.tinnitus.as_widget(attrs={'class':'form-check-input','id':'id_tinnitus'}) }}
-                  <label class="form-check-label" for="id_tinnitus">{{ form.tinnitus.label }}</label>
+                  {{ form.tinnitus }}
+                  <label class="form-check-label" for="{{ form.tinnitus.id_for_label }}">
+                    {{ form.tinnitus.label }}
+                  </label>
                 </div>
               </div>
 
               <div class="col-6 col-md-3">
                 <div class="form-check">
-                  {{ form.otalgia.as_widget(attrs={'class':'form-check-input','id':'id_otalgia'}) }}
-                  <label class="form-check-label" for="id_otalgia">{{ form.otalgia.label }}</label>
+                  {{ form.otalgia }}
+                  <label class="form-check-label" for="{{ form.otalgia.id_for_label }}">
+                    {{ form.otalgia.label }}
+                  </label>
                 </div>
               </div>
 
               <div class="col-6 col-md-3">
                 <div class="form-check">
-                  {{ form.otorrhea.as_widget(attrs={'class':'form-check-input','id':'id_otorrhea'}) }}
-                  <label class="form-check-label" for="id_otorrhea">{{ form.otorrhea.label }}</label>
+                  {{ form.otorrhea }}
+                  <label class="form-check-label" for="{{ form.otorrhea.id_for_label }}">
+                    {{ form.otorrhea.label }}
+                  </label>
                 </div>
               </div>
 
               <div class="col-6 col-md-3">
                 <div class="form-check">
-                  {{ form.vertigo.as_widget(attrs={'class':'form-check-input','id':'id_vertigo'}) }}
-                  <label class="form-check-label" for="id_vertigo">{{ form.vertigo.label }}</label>
+                  {{ form.vertigo }}
+                  <label class="form-check-label" for="{{ form.vertigo.id_for_label }}">
+                    {{ form.vertigo.label }}
+                  </label>
                 </div>
               </div>
 
               <div class="col-6 col-md-3">
                 <div class="form-check">
-                  {{ form.noise_exposure.as_widget(attrs={'class':'form-check-input','id':'id_noise_exposure'}) }}
-                  <label class="form-check-label" for="id_noise_exposure">{{ form.noise_exposure.label }}</label>
+                  {{ form.noise_exposure }}
+                  <label class="form-check-label" for="{{ form.noise_exposure.id_for_label }}">
+                    {{ form.noise_exposure.label }}
+                  </label>
                 </div>
               </div>
 
               <div class="col-6 col-md-3">
                 <div class="form-check">
-                  {{ form.hearing_aids.as_widget(attrs={'class':'form-check-input','id':'id_hearing_aids'}) }}
-                  <label class="form-check-label" for="id_hearing_aids">{{ form.hearing_aids.label }}</label>
+                  {{ form.hearing_aids }}
+                  <label class="form-check-label" for="{{ form.hearing_aids.id_for_label }}">
+                    {{ form.hearing_aids.label }}
+                  </label>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="col-md-4">
-            <label class="form-label">Medicamentos / Ototóxicos</label>
+            <label class="form-label" for="{{ form.medication.id_for_label }}">Medicamentos / Ototóxicos</label>
             {{ form.medication }}
           </div>
 
           <div class="col-md-8">
             <div class="row g-3">
               <div class="col-md-4">
-                <label class="form-label">Tipo de vértigo</label>
-                {{ form.vertigo_type.as_widget(attrs={'class':'form-control'}) }}
+                <label class="form-label" for="{{ form.vertigo_type.id_for_label }}">Tipo de vértigo</label>
+                {{ form.vertigo_type }}
               </div>
               <div class="col-md-4">
-                <label class="form-label">Duración</label>
-                {{ form.vertigo_duration.as_widget(attrs={'class':'form-control'}) }}
+                <label class="form-label" for="{{ form.vertigo_duration.id_for_label }}">Duración</label>
+                {{ form.vertigo_duration }}
               </div>
               <div class="col-md-4">
-                <label class="form-label">Desencadenantes</label>
-                {{ form.vertigo_triggers.as_widget(attrs={'class':'form-control'}) }}
+                <label class="form-label" for="{{ form.vertigo_triggers.id_for_label }}">Desencadenantes</label>
+                {{ form.vertigo_triggers }}
               </div>
             </div>
           </div>
 
           <div class="col-12">
-            <label class="form-label">Notas</label>
+            <label class="form-label" for="{{ form.notes.id_for_label }}">Notas</label>
             {{ form.notes }}
           </div>
 
@@ -104,8 +119,8 @@
             <a href="{% url 'patient_detail' patient.pk %}" class="btn btn-outline-secondary">Cancelar</a>
             <button class="btn btn-primary" type="submit">Guardar</button>
           </div>
-
         </form>
+
       </div>
     </div>
   </div>
